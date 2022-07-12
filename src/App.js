@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import Person from './components/Person'
+import axios from 'axios'
 
 const App = () => {
   const [persons, setPersons] = useState([]) 
@@ -47,7 +48,10 @@ const App = () => {
   }
   useEffect(
     () => {
-      
+      axios 
+        .get('http://localhost:3001/persons')
+        .then(response=>
+          setPersons(response.data))
     },[])
 
   const handleFilter = (event) => {
