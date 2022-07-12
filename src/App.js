@@ -3,92 +3,67 @@ import Person from './components/Person'
 import axios from 'axios'
 
 const App = () => {
-  const [persons, setPersons] = useState([]) 
-  const [newName, setNewName] = useState('')
-  const [newNumber, setNewNumber] = useState('')
-  var key = 0
-  if (persons.length > 0){
-     key = persons[persons.length - 1].id
-  }
-  const [lastKey, setLast] = useState(key)
+
+  const [countries, setCountries] = useState([])
   const [filter, setFilter] = useState('')
+  
+  useEffect(()=>{
+    axios
+      .get('https://restcountries.com/v3.1/all')
+      .then(response => {
+        setCountries(response.data)})
+  }, [])
 
-  const handleNameChange = (event) =>{
-    setNewName(event.target.value)
-  }
 
-  const handleNumberChange = (event) => {
-    setNewNumber(event.target.value)
-  }
+  const countriesToShow =  
+    countries.filter(country => 
+      country.name.common.toLowerCase().includes(filter) )
 
-  const addName = (event) =>{
-    event.preventDefault()
-    if(persons.filter((person) => person.name === newName ).length !== 0){
-      alert(`${newName} is already added`)
-    }
-    else{
-      const nameObject = {
-        name: newName,
-        number: `+51 ${newNumber}`,
-        id: lastKey + 1,
-      }
-      setLast(lastKey + 1)
-      setPersons(persons.concat(nameObject))
-      setNewName('')
-      setNewNumber('')
-    }
-    
-  }
 
-  const handleDelete = (prop) => {
-    return () => {
-      setPersons(persons.filter((person) => person.id !== prop))
-    }
-    
-  }
-  useEffect(
-    () => {
-      axios 
-        .get('http://localhost:3001/persons')
-        .then(response=>
-          setPersons(response.data))
-    },[])
-
-  const handleFilter = (event) => {
+  const handleFilter = (event) =>{
     setFilter(event.target.value)
   }
 
-  const personToShow = (filter !== '') 
-    ? persons.filter(person => person.name.toLowerCase().includes(filter))
-    : persons
-
+  
 
   return (
-    <div>
-      <h2>Phonebook</h2>
+    <div style={{
+      'maxWidth': '400px',
+      'margin': '0 auto',
+      'minHeight': 'auto',
+      'padding': '20px',
+      'border' : '1px solid black',
+      'borderRadius': '5px'
+    }}>
+      <h2>Countries</h2>
         <label>
-          filter shown with <input value={filter} onChange={handleFilter} />
+          <span style={{'marginRight': '10px'}}>
+            filter shown with 
+          </span>
+          <input value={filter} onChange={handleFilter} />
         </label>
-      <h2>Add a new</h2>
-      <form onSubmit={addName}>
-        <div style={{'display': 'flex', 'flexDirection': 'column', 'gap': '10px', 'marginBottom': '10px'}}>
-          <label>
-            name: <input value={newName} onChange={handleNameChange}/>
-          </label>
-          <label>
-            number: <input value={newNumber} onChange={handleNumberChange}/>
-          </label>
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
-      <h2>Numbers</h2>
-      <ul style={{'listStyle': 'none', 'paddingLeft': '0'}}>
-        {personToShow.map(person => 
-            <Person key={person.id} person={person} handle={handleDelete(person.id)}/>
-        )}
-      </ul>
+      <h2>Results</h2>
+      
+        {countries.length !== 0
+        ? countriesToShow.length <= 10
+            ? countriesToShow.length !== 1
+              ? <ul>{countriesToShow.map(country =>
+                 <li key={country.cca2}>{country.name.common}</li>)}</ul>
+              : <div style={{'textAlign': 'center'}}>
+                  <h1>{countriesToShow[0].name.common}</h1>
+                  <p>Capital: {countriesToShow[0].capital}</p>
+                  <p>Area: {countriesToShow[0].area}</p>
+                  <h3>languages: </h3>
+                  <ul>
+                    {Object.keys(countriesToShow[0].languages).map(item =>
+                    <li key={item}>{countriesToShow[0].languages[item]}</li>
+                      )}
+                  </ul>
+                  <img src={countriesToShow[0].flags.png} />
+                </div>
+            : <div>There are too many matches</div>
+        : <div>Waiting...</div>}
+      
     </div>
   )
 }
