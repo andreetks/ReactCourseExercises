@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import Person from './components/Person'
-import Pokemon from './components/Pokemon'
 
 const App = () => {
   const [persons, setPersons] = useState([
@@ -64,7 +63,6 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-        <Pokemon></Pokemon>
         <label>
           filter shown with <input value={filter} onChange={handleFilter} />
         </label>
