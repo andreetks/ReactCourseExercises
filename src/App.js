@@ -7,7 +7,6 @@ const App = () => {
   const [countries, setCountries] = useState([])
   const [filter, setFilter] = useState('')
   const [ flagArr, setFlagArr ] = useState({})
-  const [flag, setFlag] = useState(false)
   
   useEffect(()=>{
     axios
