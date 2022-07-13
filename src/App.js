@@ -7,6 +7,7 @@ const App = () => {
   const [countries, setCountries] = useState([])
   const [filter, setFilter] = useState('')
   const [ flagArr, setFlagArr ] = useState({})
+
   
   useEffect(()=>{
     axios
@@ -18,7 +19,7 @@ const App = () => {
 
   const countriesToShow =  
     countries.filter(country => 
-      country.name.common.toLowerCase().includes(filter) )
+      country.name.common.toLowerCase().includes(filter.toLowerCase()) )
 
 
   const handleFilter = (event) =>{
@@ -37,7 +38,7 @@ const App = () => {
       <h2>Countries</h2>
         <label>
           <span style={{'marginRight': '10px'}}>
-            filter shown with 
+            filter countries by:
           </span>
           <input value={filter} onChange={handleFilter} />
         </label>
@@ -46,19 +47,20 @@ const App = () => {
         {countries.length !== 0
         ? countriesToShow.length <= 10
             ? countriesToShow.length !== 1
-              ? <ul>{countriesToShow.map((country, index) =>{
-                 console.log('setting', index, 'to', flagArr)
-                 return <li key={country.cca2}>
-                  {country.name.common} &nbsp;
-                  <button onClick={()=> setFlagArr({ ...flagArr, [index]: !flagArr[index] }) }>
-                    Show</button>
-                  {flagArr[index]
-                    ? <Country country={countriesToShow[index]} />
-                    : <></>
-                  }
-                  </li>}
-                 )}
-                 </ul>
+              ? countriesToShow.length !== 0
+                ? <ul>{countriesToShow.map((country, index) =>{
+                  return <li key={country.cca2}>
+                    {country.name.common} &nbsp;
+                    <button onClick={()=> setFlagArr({ ...flagArr, [index]: !flagArr[index] }) }>
+                      Show</button>
+                    {flagArr[index]
+                      ? <Country country={countriesToShow[index]} />
+                      : <></>
+                    }
+                    </li>}
+                  )}
+                  </ul>
+                : <div>There aren't matches</div>
               : <Country country={countriesToShow[0]} />
             : <div>There are too many matches</div>
         : <div>Waiting...</div>}
