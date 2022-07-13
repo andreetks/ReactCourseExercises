@@ -10,7 +10,7 @@ const Country = ({ country }) => {
 
     
     useEffect(()=>{
-      
+
       axios
         .get(url)
         .then(response => {
