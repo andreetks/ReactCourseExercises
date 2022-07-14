@@ -1,70 +1,93 @@
 import { useState, useEffect } from 'react'
-import Country from './components/Country'
 import axios from 'axios'
 
 const App = () => {
-
-  const [countries, setCountries] = useState([])
+  const [persons, setPersons] = useState([]) 
+  const [newName, setNewName] = useState('')
+  const [newNumber, setNewNumber] = useState('')
+  var key = 0
+  if (persons.length > 0){
+     key = persons[persons.length - 1].id
+  }
+  const [lastKey, setLast] = useState(key)
   const [filter, setFilter] = useState('')
-  const [ flagArr, setFlagArr ] = useState({})
 
-  
-  useEffect(()=>{
-    axios
-      .get('https://restcountries.com/v3.1/all')
-      .then(response => {
-        setCountries(response.data)})
-  }, [])
+  const handleNameChange = (event) =>{
+    setNewName(event.target.value)
+  }
 
+  const handleNumberChange = (event) => {
+    setNewNumber(event.target.value)
+  }
 
-  const countriesToShow =  
-    countries.filter(country => 
-      country.name.common.toLowerCase().includes(filter.toLowerCase()) )
+  const addName = (event) =>{
+    event.preventDefault()
+    if(persons.filter((person) => person.name === newName ).length !== 0){
+      alert(`${newName} is already added`)
+    }
+    else{
+      const nameObject = {
+        name: newName,
+        number: `+51 ${newNumber}`,
+        id: lastKey + 1,
+      }
+      setLast(lastKey + 1)
+      setPersons(persons.concat(nameObject))
+      setNewName('')
+      setNewNumber('')
+    }
+    
+  }
 
+  const handleDelete = (prop) => {
+    return () => {
+      setPersons(persons.filter((person) => person.id !== prop))
+    }
+    
+  }
+  useEffect(
+    () => {
+      axios 
+        .get('http://localhost:3001/persons')
+        .then(response=>
+          setPersons(response.data))
+    },[])
 
-  const handleFilter = (event) =>{
+  const handleFilter = (event) => {
     setFilter(event.target.value)
   }
 
+  const personToShow = (filter !== '') 
+    ? persons.filter(person => person.name.toLowerCase().includes(filter))
+    : persons
+
+
   return (
-    <div style={{
-      'maxWidth': '400px',
-      'margin': '0 auto',
-      'minHeight': 'auto',
-      'padding': '20px',
-      'border' : '1px solid black',
-      'borderRadius': '5px'
-    }}>
-      <h2>Countries</h2>
+    <div>
+      <h2>Phonebook</h2>
         <label>
-          <span style={{'marginRight': '10px'}}>
-            filter countries by:
-          </span>
-          <input value={filter} onChange={handleFilter} />
+          filter shown with <input value={filter} onChange={handleFilter} />
         </label>
-      <h2>Results</h2>
-      
-        {countries.length !== 0
-        ? countriesToShow.length <= 10
-            ? countriesToShow.length !== 1
-              ? countriesToShow.length !== 0
-                ? <ul>{countriesToShow.map((country, index) =>{
-                  return <li key={country.cca2}>
-                    {country.name.common} &nbsp;
-                    <button onClick={()=> setFlagArr({ ...flagArr, [index]: !flagArr[index] }) }>
-                      Show</button>
-                    {flagArr[index]
-                      ? <Country country={countriesToShow[index]} />
-                      : <></>
-                    }
-                    </li>}
-                  )}
-                  </ul>
-                : <div>There aren't matches</div>
-              : <Country country={countriesToShow[0]} />
-            : <div>There are too many matches</div>
-        : <div>Waiting...</div>}
-      
+      <h2>Add a new</h2>
+      <form onSubmit={addName}>
+        <div style={{'display': 'flex', 'flexDirection': 'column', 'gap': '10px', 'marginBottom': '10px'}}>
+          <label>
+            name: <input value={newName} onChange={handleNameChange}/>
+          </label>
+          <label>
+            number: <input value={newNumber} onChange={handleNumberChange}/>
+          </label>
+        </div>
+        <div>
+          <button type="submit">add</button>
+        </div>
+      </form>
+      <h2>Numbers</h2>
+      <ul style={{'listStyle': 'none', 'paddingLeft': '0'}}>
+        {personToShow.map(person => 
+            <Person key={person.id} person={person} handle={handleDelete(person.id)}/>
+        )}
+      </ul>
     </div>
   )
 }
