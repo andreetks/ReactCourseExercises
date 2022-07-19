@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react'
 import Person from './components/Person'
 import numberServices from './services/numbers'
+import Notification from './components/Notification'
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
-  
   const [lastKey, setLast] = useState(0)
   const [filter, setFilter] = useState('')
+  const [notification, setNotification] = useState(null)
+  const [color, setColor] = useState('green')
 
   const handleNameChange = (event) => {
     setNewName(event.target.value)
@@ -30,6 +32,20 @@ const App = () => {
           .update(changeNumber.id, changeNumber)
           .then(returnedNumber =>{
             setPersons(persons.map(person => person.id !== returnedNumber.id ? person : returnedNumber))
+            setColor('green')
+            setNotification(`Update ${returnedNumber.name}'s number`)
+            setTimeout(()=>{
+              setNotification(null)
+            },5000)
+            setNewName('')
+            setNewNumber('')
+          })
+          .catch(error=>{
+            setColor('red')
+            setNotification(`Information of ${person.name} has already been removed from server`)
+            setTimeout(()=>{
+              setNotification(null)
+            },5000)
             setNewName('')
             setNewNumber('')
           })
@@ -47,6 +63,11 @@ const App = () => {
         .then(returnedNumber => {
           setLast(lastKey + 1)
           setPersons(persons.concat(returnedNumber))
+          setColor('green')
+          setNotification(`Added ${returnedNumber.name}`)
+            setTimeout(()=>{
+              setNotification(null)
+            },5000)
           setNewName('')
           setNewNumber('')
         })
@@ -89,6 +110,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notification} color={color}/>
       <label>
         filter shown with <input value={filter} onChange={handleFilter} />
       </label>
